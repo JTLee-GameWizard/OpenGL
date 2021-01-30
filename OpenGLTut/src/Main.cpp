@@ -17,6 +17,30 @@ void ReadShader(std::string& OutSrc, const std::string& Dir)
 	}
 }
 
+void GetShaderCompliationMsg(unsigned int Shader)
+{
+	int Success;
+	char Log[512];
+	glGetShaderiv(Shader, GL_COMPILE_STATUS, &Success);
+	if (!Success)
+	{
+		glGetShaderInfoLog(Shader, 512, nullptr, Log);
+		std::cout << "Shader Compilation Error: " << Log << std::endl;
+	}
+}
+
+void GetShaderProgramLinkMsg(unsigned int Program)
+{
+	int Success;
+	char Log[512];
+	glGetProgramiv(Program, GL_LINK_STATUS, & Success);
+	if (!Success)
+	{
+		glGetProgramInfoLog(Program, 512, NULL, Log);
+		std::cout << "program linking error: " << Log << std::endl;
+	}
+}
+
 int main()
 {
 	glfwInit();
@@ -65,11 +89,15 @@ int main()
 	glShaderSource(FragShader,1, &FragShaderSrcRaw, nullptr);
 	glCompileShader(FragShader);
 
+	GetShaderCompliationMsg(VertexShader);
+	GetShaderCompliationMsg(FragShader);
+
 	unsigned int Program =  glCreateProgram();
-	glAttachShader(VertexShader, Program);
-	glAttachShader(FragShader, Program);
+	glAttachShader(Program, VertexShader);
+	glAttachShader(Program, FragShader);
 	glLinkProgram(Program);
 	glUseProgram(Program);
+	GetShaderProgramLinkMsg(Program);
 
 	glDeleteShader(VertexShader);
 	glDeleteShader(FragShader);
