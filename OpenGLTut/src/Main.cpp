@@ -1,8 +1,22 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <string>
+#include <fstream>
 const int windowWidth = 1280;
 const int windowHeight = 720;
+
+void ReadShader(std::string& OutSrc, const std::string& Dir)
+{
+	std::ifstream SrcInFileStream{Dir};
+	std::string Read;
+	while (std::getline(SrcInFileStream, Read))
+	{
+		OutSrc += Read;
+		OutSrc += '\n';
+	}
+}
+
 int main()
 {
 	glfwInit();
@@ -33,6 +47,33 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
 	glEnableVertexAttribArray(0);
 	
+	std::string VertexShaderSrcStr;
+	ReadShader(VertexShaderSrcStr, "Resources/Shaders/VertexShader.shader");
+	std::cout << VertexShaderSrcStr;
+
+	std::string FragShaderSrcStr;
+	ReadShader(FragShaderSrcStr, "Resources/Shaders/FragmentShader.shader");
+	std::cout << FragShaderSrcStr;
+	
+	const char* VertexShaderSrcRaw = VertexShaderSrcStr.c_str();
+	unsigned int VertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(VertexShader, 1, &VertexShaderSrcRaw, nullptr);
+	glCompileShader(VertexShader);
+
+	const char* FragShaderSrcRaw = FragShaderSrcStr.c_str();
+	unsigned int FragShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(FragShader,1, &FragShaderSrcRaw, nullptr);
+	glCompileShader(FragShader);
+
+	unsigned int Program =  glCreateProgram();
+	glAttachShader(VertexShader, Program);
+	glAttachShader(FragShader, Program);
+	glLinkProgram(Program);
+	glUseProgram(Program);
+
+	glDeleteShader(VertexShader);
+	glDeleteShader(FragShader);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.5, 0.3, 0.1, 1.0);
