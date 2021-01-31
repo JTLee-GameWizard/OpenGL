@@ -3,6 +3,9 @@
 #include <GLFW/glfw3.h>
 #include <string>
 #include <fstream>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stbi_image.h>
+
 const int windowWidth = 1280;
 const int windowHeight = 720;
 
@@ -142,6 +145,21 @@ int main()
 
 	glDeleteShader(VertexShader);
 	glDeleteShader(FragShader);
+
+	unsigned int Texture;
+	glGenTextures(1, &Texture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, Texture);
+	int width, height, comp;
+	unsigned char* data = stbi_load("Resources/Texture/PlankTexture.jpg", &width, &height, &comp, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	stbi_image_free(data);
+	int TextureUniformLoc = glGetUniformLocation(Program, "Texture");
+	glUniform1i(TextureUniformLoc, 0);
 
 	while (!glfwWindowShouldClose(window))
 	{

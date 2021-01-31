@@ -26,4 +26,9 @@
     <None Include="Resources\Shaders\VertexShader.shader" />
     <None Include="Resources\Shaders\FragmentShader.shader" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\stbi_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

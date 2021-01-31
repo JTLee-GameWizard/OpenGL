@@ -3,8 +3,9 @@
 out vec4 FinalColor;
 
 in vec3 vertexPos;
-
+in vec2 TexCoord;
+uniform sampler2D Texture;
 void main()
 {
-	FinalColor = vec4(1.0, 0.5, 0.3, 1.0) + vec4(vertexPos, 0.0);
+	FinalColor = texture(Texture, TexCoord);
 }
