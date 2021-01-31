@@ -49,6 +49,46 @@ void GetShaderProgramLinkMsg(unsigned int Program)
 	}
 }
 
+glm::vec3 cameraLoc = glm::vec3(0.f, 0.f, 3.f);
+glm::vec3 cameraDir = glm::vec3(0.f, 0.f, -1.f);
+glm::vec3 cameraUp = glm::vec3(0.f, 1.f, 0.f);
+glm::vec3 cameraRight = glm::cross(cameraDir, cameraUp);
+float cameraMoveSpeed = 2.f;
+float cameraRotationSpeed = 0.01f;
+double PreviousMousePosX = 0;
+double PreviousMousePosY = 0;
+
+float Yaw = -90.f;
+float Pitch = 0.f;
+bool FirstEntry = true;
+void CursorMoved(GLFWwindow* winowInvolved, double xPos, double yPos)
+{
+	if (FirstEntry)
+	{
+		PreviousMousePosX = xPos;
+		PreviousMousePosY = yPos;
+		FirstEntry = false;
+	}
+
+	double xOffset = xPos - PreviousMousePosX;
+	double yOffset = yPos - PreviousMousePosY;
+	PreviousMousePosX = xPos;
+	PreviousMousePosY = yPos;
+
+	Yaw += xOffset * cameraRotationSpeed;
+	Pitch -= yOffset * cameraRotationSpeed;
+	
+	Pitch = Pitch > 89.f ? 89.f : Pitch;
+	Pitch = Pitch < -89.f ? -89.f : Pitch;
+
+	float DirX = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	float DirZ = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	float DirY = sin(glm::radians(Pitch));
+
+	cameraDir = glm::normalize(glm::vec3(DirX, DirY, DirZ));
+	cameraRight = glm::cross(cameraDir, cameraUp);
+}
+
 int main()
 {
 	glfwInit();
@@ -173,11 +213,8 @@ int main()
 	glm::mat4 CubeModelMatrix = glm::mat4(1.0);
 	glm::mat4 ViewMatrix = glm::translate(glm::mat4(1.0), glm::vec3(0.f, 0.f, -3.f));
 
-	glm::vec3 cameraLoc = glm::vec3(0.f, 0.f, 3.f);
-	glm::vec3 cameraDir = glm::vec3(0.f, 0.f, -1.f);
-	glm::vec3 cameraUp = glm::vec3(0.f, 1.f, 0.f);
-	glm::vec3 cameraRight = glm::cross(cameraDir, cameraUp);
-	float cameraMoveSpeed = 2.f;
+	glfwSetCursorPosCallback(window, CursorMoved);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.5, 0.3, 0.1, 1.0);
