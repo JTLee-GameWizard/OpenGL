@@ -6,6 +6,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stbi_image.h>
 
+//glm
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 const int windowWidth = 1280;
 const int windowHeight = 720;
 
@@ -161,10 +166,15 @@ int main()
 	int TextureUniformLoc = glGetUniformLocation(Program, "Texture");
 	glUniform1i(TextureUniformLoc, 0);
 
+	glm::mat4 CubeTransform = glm::mat4(1.0);
+	CubeTransform = glm::rotate(CubeTransform, glm::radians(45.f), glm::vec3(1.f, 1.f, 1.f));
+	int ModelMatLoc = glGetUniformLocation(Program, "modelMat");
+	glUniformMatrix4fv(ModelMatLoc, 1, GL_FALSE, glm::value_ptr(CubeTransform));
+	glEnable(GL_DEPTH_TEST);
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.5, 0.3, 0.1, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
