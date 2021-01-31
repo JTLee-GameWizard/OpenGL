@@ -166,15 +166,50 @@ int main()
 	int TextureUniformLoc = glGetUniformLocation(Program, "Texture");
 	glUniform1i(TextureUniformLoc, 0);
 
-	glm::mat4 CubeTransform = glm::mat4(1.0);
-	CubeTransform = glm::rotate(CubeTransform, glm::radians(45.f), glm::vec3(1.f, 1.f, 1.f));
-	int ModelMatLoc = glGetUniformLocation(Program, "modelMat");
-	glUniformMatrix4fv(ModelMatLoc, 1, GL_FALSE, glm::value_ptr(CubeTransform));
+	float PreviousTime = glfwGetTime();
+	float DeltaTime = 0;
+	float cubeRotateSpeed = 20.f;
 	glEnable(GL_DEPTH_TEST);
+	glm::mat4 CubeModelMatrix = glm::mat4(1.0);
+	glm::mat4 ViewMatrix = glm::translate(glm::mat4(1.0), glm::vec3(0.f, 0.f, -3.f));
+
+	glm::vec3 cameraLoc = glm::vec3(0.f, 0.f, 3.f);
+	glm::vec3 cameraDir = glm::vec3(0.f, 0.f, -1.f);
+	glm::vec3 cameraUp = glm::vec3(0.f, 1.f, 0.f);
+	glm::vec3 cameraRight = glm::cross(cameraDir, cameraUp);
+	float cameraMoveSpeed = 2.f;
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.5, 0.3, 0.1, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		float CurrentTime = glfwGetTime();
+		DeltaTime = CurrentTime - PreviousTime;
+		PreviousTime = glfwGetTime();
+
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			cameraLoc += cameraDir * cameraMoveSpeed * DeltaTime;
+		else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			cameraLoc -= cameraDir * cameraMoveSpeed * DeltaTime;
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			cameraLoc += cameraRight * cameraMoveSpeed * DeltaTime;
+		else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+			cameraLoc -= cameraRight * cameraMoveSpeed * DeltaTime;
+
+		
+		CubeModelMatrix = glm::rotate(CubeModelMatrix, glm::radians(DeltaTime * cubeRotateSpeed), glm::vec3(1.f, 1.f, 1.f));
+		int ModelMatLoc = glGetUniformLocation(Program, "modelMat");
+		glUniformMatrix4fv(ModelMatLoc, 1, GL_FALSE, glm::value_ptr(CubeModelMatrix));
+
+		ViewMatrix = glm::lookAt(cameraLoc, cameraLoc + cameraDir, cameraUp);
+		int ViewMatLoc = glGetUniformLocation(Program, "viewMat");
+		glUniformMatrix4fv(ViewMatLoc, 1, GL_FALSE, glm::value_ptr(ViewMatrix));
+
+		float aspectRatio = (float)windowWidth / (float)windowHeight;
+		glm::mat4 ProjectMatrix = glm::perspective(glm::radians(45.f), aspectRatio, 0.01f, 100.f);
+		int ProjectMatLoc = glGetUniformLocation(Program, "ProjectMat");
+		glUniformMatrix4fv(ProjectMatLoc, 1, GL_FALSE, glm::value_ptr(ProjectMatrix));
+
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
